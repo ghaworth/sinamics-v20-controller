@@ -34,5 +34,18 @@ pub fn build_write_single_register(slave: u8, register: u16, value: u16) -> Vec<
 }
 
 pub fn build_read_holding_registers(slave: u8, register: u16, count: u16) -> Vec<u8> {
-    vec![]
+    let mut frame = Vec::new();
+
+    frame.push(slave);                          // Slave address
+    frame.push(0x03);                           // Function code (read holding registers)
+    frame.push((register >> 8) as u8);          // Register address high byte
+    frame.push((register & 0xFF) as u8);        // Register address low byte
+    frame.push((count >> 8) as u8);             // Number of registers high byte
+    frame.push((count & 0xFF) as u8);           // Number of registers low byte
+
+    let crc = calculate_crc16(&frame);
+    frame.push((crc & 0xFF) as u8);             // CRC low byte
+    frame.push((crc >> 8) as u8);               // CRC high byte
+
+    frame
 }
